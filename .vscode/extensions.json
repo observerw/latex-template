@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "tecosaur.latex-utilities",
+        "james-yu.latex-workshop",
+        "valentjn.vscode-ltex",
+        "gruntfuggly.todo-tree",
+        "sabertazimi.latex-snippets"
+    ]
+}
