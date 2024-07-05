@@ -1,8 +1,8 @@
 # 环境安装
 
-按照 [tinytex](https://yihui.org/tinytex/#installation) 的文档安装即可。
+按照 [tinytex](https://yihui.org/tinytex/#installation) 的文档安装即可。安装 tinytex 会比完整安装 TexLive 的体积小很多，因此十分推荐。
 
-如果安装完后，编译 LaTeX 文件时提示缺少某些包，可以使用 `tlmgr install 包名` 安装。
+安装完后，若编译 LaTeX 文件时提示缺少某些包，可以使用 `tlmgr install 包名` 安装。
 
 安装完毕后可以在命令行中运行：
 
@@ -14,7 +14,7 @@ make check
 
 # 编译/预览
 
-文章主体在 `main.tex` 文件中；各章内容分别在 `sections` 文件夹的对应文件中，比如文章的 Introduction 就在 `sections/intro.tex`中。
+文章主体在 `main.tex` 文件中；各章内容分别在 `sections` 文件夹的对应文件中，比如文章的 Introduction 就在 `sections/intro.tex`中；图片在 `figures` 文件夹中；算法、伪代码等内容可放在 `algorithms` 文件夹中。
 
 打开 `main.tex` 文件，点击右上角的绿色箭头执行编译；点击绿色箭头旁边的图标可以预览。由于设置了文件保存时自动编译，所以一般情况下不需要手动按绿色箭头。
 
@@ -83,7 +83,7 @@ make check
 
 # 附件
 
-图片全部放在 `figures` 目录下，引用的路径为 `figures/figure.pdf`。图片最好使用 `pdf` 格式。
+图片全部放在 `figures` 目录下，引用的路径为 `figures/figure.pdf`。最好使用 `pdf` 格式的图片。
 
 引用图片可以使用 `Figure` 缩写，然后在 `label` 中输入图片的文件名，比如：
 
@@ -98,7 +98,7 @@ make check
 
 # 交叉引用
 
-在每一个章节、图、表、公式、算法等地方都要设置一个 `label`，**`label` 最好遵循一定的命名规范**，比如图片使用 `fig:figure`，表格使用 `tab:table`，章节使用 `sec:section`，公式使用 `eq:equation`，算法使用 `alg:algorithm` 等。
+在每一个章节、图、表、公式、算法等地方都要设置一个 `label`，**`label` 最好遵循一定的命名规范**，比如图片使用 `fig:figure`，表格使用 `tab:table`，章节使用 `sec:section`，公式使用 `eq:equation`，算法使用 `algo:algorithm` 等。
 
 引用时可以输入相应的缩写，然后在 `label` 中输入引用的 `label`，比如想要引用 `label` 为 `fig:figure` 的图片，可以使用 `Figure:Ref` 缩写，然后在 `label` 中输入 `fig:figure`。
 
@@ -137,25 +137,25 @@ make check
 
 有的会议要求所有的 LaTeX 内容必须写在一个文件中，不能使用 `\input{}` 命令来分别导入各章节，因此当写作完成后有可能还需要将所有的内容导出到一个文件中。
 
-在命令行中运行：
+对于 Unix 系统，在控制台中运行：
 
 ```bash
 make export
 ```
 
-在 Windows 下没有安装 `make` 的话，可以直接运行：
+在 Windows 下没有安装 `make` 的话，可以在根目录下打开控制台，运行：
 
 ```bash
 python scripts/replace-input.py -b %cd% -i main.tex -o export.tex
 ```
 
-运行后将会在根目录下生成一个 `export.tex` 文件，其中包含了所有的内容。
+运行后将会在根目录下生成一个 `export.tex` 文件。
 
 为了保证生成内容无误，最好在生成之后将其编译一遍，检查是否可以正常编译。
 
 # 内容备份
 
-写完一个部分之后 `git commit` 一下；将仓库推送到一个私人的远程仓库或设置为 private 的 GitHub 仓库中；或者使用一个单独的外接硬盘定期对仓库进行备份。
+为了防止内容丢失，写完一个部分之后 `git commit` 一下；将仓库推送到一个私人的远程仓库或设置为 private 的 GitHub 仓库中；或者使用一个单独的外接硬盘定期对仓库进行备份。
 
 # TODO
 
