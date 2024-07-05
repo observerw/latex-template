@@ -8,3 +8,6 @@ check:
 
 export:
 	python3 scripts/replace-input.py -b $(shell pwd) -i main.tex -o export.tex
+
+archive:
+	git add . && git commit -m "archive" && git archive --format zip -o archive.zip HEAD
