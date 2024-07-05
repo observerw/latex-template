@@ -1,0 +1,25 @@
+% an example algorithm
+
+\begin{algorithm}
+    \caption{An example algorithm}
+    \label{alg:example}
+    \begin{algorithmic}
+
+        \STATE \textbf{Input:} A set of $n$ points $P = \{p_1, p_2, \ldots, p_n\}$ in a metric space.
+        \STATE \textbf{Output:} A hierarchical clustering of $P$.
+
+        \STATE $C \leftarrow \emptyset$
+        \FOR{$i = 1$ to $n$}
+        \STATE $C \leftarrow C \cup \{ \{p_i\} \}$
+        \ENDFOR
+
+        \WHILE{$|C| > 1$}
+        \STATE Find two clusters $C_i, C_j \in C$ that are closest to each other.
+        \STATE Merge $C_i$ and $C_j$ into a single cluster.
+        \STATE $C \leftarrow C \setminus \{C_i, C_j\} \cup \{C_i \cup C_j\}$
+        \ENDWHILE
+
+        \STATE \textbf{return} $C$
+
+    \end{algorithmic}
+\end{algorithm}

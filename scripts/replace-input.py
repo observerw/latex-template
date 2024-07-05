@@ -20,15 +20,17 @@ import argparse
 from pathlib import Path
 import re
 import sys
+from typing import Iterable
 
 tex_input_re = re.compile(r"^\s*\\input{(.*?)}")
 tex_include_re = re.compile(r"^\s*\\include{(.*?)}")
 
 
-def transform_line(base_path: Path, line: str):
+def transform_line(base_path: Path, line: str) -> Iterable[str]:
     match = tex_input_re.match(line) or tex_include_re.match(line)
     if not match:
-        return line
+        yield line
+        return
 
     include_path = match.group(1)
     if not include_path or not include_path.endswith(".tex"):
@@ -38,13 +40,16 @@ def transform_line(base_path: Path, line: str):
     if not include_path.exists():
         raise FileNotFoundError(f"File {include_path} not found")
 
-    return f"\n{include_path.read_text()}\n"
+    yield "\n"
+    for transformed_line in transform(base_path, include_path):
+        yield transformed_line
+    yield "\n"
 
-
-def transform(base_path: Path, input_path: Path):
+def transform(base_path: Path, input_path: Path) -> Iterable[str]:
     with open(input_path, "r", encoding="utf-8") as f:
-        for line in f:
-            yield transform_line(base_path, line)
+        for line in f: 
+            for transformed_line in transform_line(base_path, line):
+                yield transformed_line
 
 
 def main(base_path: Path, input_path: Path, output_path: Path):
