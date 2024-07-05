@@ -205,3 +205,17 @@ There are mainly two ways to make braised chicken in chili sauce. One is to cut 
 ```
 
 众所周知 Copilot 写作的时候需要足够的上下文，因此如果写当前内容需要其他部分提供的上下文（比如写 Method 的时候可能需要 Intro 中提到的内容），可以把内容复制到当前文件并全部注释掉。
+
+# 与 Overleaf 同步
+
+万恶的资本主义 Overleaf 必须要充会员才能使用 Git 同步功能，在没有会员的情况下我们只能**手动将本地项目打包成压缩包，然后上传到 Overleaf 上**。
+
+在本地项目根目录下运行：
+
+```bash
+make archive
+```
+
+运行后将会在根目录下生成一个 `archive.zip` 文件，然后在 Overleaf 上新建一个项目，选择上传压缩包，上传 `archive.zip` 文件即可。
+
+上传成功后将会创建一个新的项目。后续如果在本地进行了修改，可以直接把修改后的文本复制粘贴到 Overleaf 上的对应文件中。当然如果你不嫌麻烦，可以每次都删掉旧项目，重新上传压缩包。
