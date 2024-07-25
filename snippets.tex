@@ -1,6 +1,8 @@
 \documentclass[letterpaper]{article}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmicx,algpseudocode}
+\usepackage{booktabs}
+\usepackage{multirow}
 
 \begin{document}
 
@@ -114,26 +116,49 @@ Figure~\ref{fig:grid2} shows an example.
 
 Table~\ref{tab:standard} shows an example.
 
-% 跨行表格
+% 标准三线表（使用 booktabs 宏包）
 
-\subsection{Wide Tables}
+\subsection{Standard Three-Line Tables}
 
-\begin{table*}
+\begin{table}
     \centering
-    \begin{tabular}{|c|c|c|}
-        \hline
+    \begin{tabular}{ccc}
+        \toprule
         A & B & C \\
-        \hline
+        \midrule
         1 & 2 & 3 \\
         4 & 5 & 6 \\
-        \hline
+        \bottomrule
     \end{tabular}
     \caption{Example}
-    \label{tab:wide}
+    \label{tab:three-line}
+\end{table}
 
+Table~\ref{tab:three-line} shows an example.
+
+% 包含子列的三线表
+
+% 使用 multirow 宏包
+
+\subsection{Three-Line Tables with Subcolumns}
+
+\begin{table*}[t]
+    \centering
+    \begin{tabular}{c c c c}
+        \toprule
+        \multirow{2}{*}{A} & \multicolumn{2}{c}{B} & \multirow{2}{*}{C}     \\
+        \cmidrule{2-3}     & D                     & E                  &   \\
+        \midrule
+        1                  & 2                     & 3                  & 4 \\
+        5                  & 6                     & 7                  & 8 \\
+        \bottomrule
+    \end{tabular}
+
+    \caption{Example}
+    \label{tab:subcolumns}
 \end{table*}
 
-Table~\ref{tab:wide} shows an example.
+Table~\ref{tab:subcolumns} shows an example.
 
 \section{Algorithms}
 
