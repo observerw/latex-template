@@ -48,8 +48,7 @@ def transform_line(base_path: Path, line: str) -> Iterable[str]:
 def transform(base_path: Path, input_path: Path) -> Iterable[str]:
     with open(input_path, "r", encoding="utf-8") as f:
         for line in f: 
-            for transformed_line in transform_line(base_path, line):
-                yield transformed_line
+            yield from transform_line(base_path, line)
 
 
 def main(base_path: Path, input_path: Path, output_path: Path):
