@@ -38,15 +38,18 @@ def transform(
             return
 
         include_path = match.group(1)
-        if not include_path or not include_path.endswith(".tex"):
+        if not include_path:
             raise ValueError(f"Invalid include path: {include_path}")
 
         include_path = Path(base_path / include_path)
+        if not include_path.suffix:
+            include_path = include_path.with_suffix(".tex")
+
         if not include_path.exists():
             raise FileNotFoundError(f"File {include_path} not found")
 
         yield "\n"
-        for transformed_line in transform(base_path, include_path):
+        for transformed_line in transform(base_path, include_path, ignore_comment):
             if ignore_comment and transformed_line.strip().startswith("%"):
                 continue
 
@@ -72,7 +75,6 @@ def main(args: argparse.Namespace):
                 base_path,
                 input_path,
                 ignore_comment=args.ignore_comment,
-
             )
         )
 
