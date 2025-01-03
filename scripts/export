@@ -1,0 +1,123 @@
+#! /usr/bin/env python3
+import argparse
+import itertools
+import re
+import shutil
+from collections.abc import Generator, Iterable
+from pathlib import Path
+
+tex_input_re = re.compile(r"^\s*\\input{(.*?)}")
+comment_re = re.compile(r"^\s*%.*\n")
+export_blob_path = Path(".export")
+export_dir_path = Path("export")
+main_file_path = Path("main.tex")
+
+
+def transform(path: Path) -> Generator[str, None, list[Path]]:
+    def transform_line(line: str) -> Generator[str, None, Path | None]:
+        if not (match := tex_input_re.match(line)):
+            yield line
+            return None
+
+        input_path = match.group(1)
+        input_path = Path(input_path).with_suffix(".tex")
+        if not input_path.exists():
+            raise FileNotFoundError(f"File {input_path} included in {path} not found")
+
+        yield from itertools.chain("\n", transform_line(line), "\n")
+        return input_path
+
+    input_paths: list[Path] = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            input_path = yield from transform_line(line)
+            if input_path:
+                input_paths.append(input_path)
+
+    return input_paths
+
+
+def transform_file() -> list[Path]:
+    content_iter = transform(main_file_path)
+    with open(export_dir_path / "main.tex", "w", encoding="utf-8") as f:
+        while True:
+            try:
+                f.write(next(content_iter))
+            except StopIteration as e:
+                return e.value + [main_file_path]
+    return []
+
+
+def export_files(exclude: Iterable[Path] | None = None):
+    exclude = set(exclude or [])
+
+    if not export_blob_path.exists():
+        raise FileNotFoundError("No .export file found")
+
+    blobs = export_blob_path.read_text(encoding="utf-8").splitlines()
+    blobs = (blob for raw_blobs in blobs if (blob := raw_blobs.strip()))
+    file_paths = (
+        path  #
+        for blob in blobs
+        for path in Path(".").glob(blob)
+        if path.is_file() and path not in exclude
+    )
+
+    for file_path in file_paths:
+        target_path = export_dir_path / file_path
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(file_path, target_path)
+        print(f"Exported: {file_path}")
+
+
+def remove_comments():
+    def apply(file_path: Path):
+        content = file_path.read_text(encoding="utf-8")
+        content = re.sub(r"(?<!\\)%.*$", "", content, flags=re.MULTILINE)
+        content = re.sub(r"\n\s*\n+", "\n\n", content)
+        file_path.write_text(content, encoding="utf-8")
+
+    for tex_file in export_dir_path.glob("**/*.tex"):
+        apply(tex_file)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Export files based on .export configuration"
+    )
+    parser.add_argument(
+        "--single-file",
+        "-s",
+        action="store_true",
+        help="Export main.tex only",
+    )
+    parser.add_argument(
+        "--ignore-comments",
+        "-c",
+        action="store_true",
+        help="Remove comments from exported .tex files",
+    )
+    args = parser.parse_args()
+
+    try:
+        if export_dir_path.exists():
+            shutil.rmtree(export_dir_path)
+        export_dir_path.mkdir()
+
+        exclude: list[Path] = transform_file() if args.single_file else []
+        export_files(exclude)
+
+        if args.ignore_comments:
+            remove_comments()
+
+        print(
+            "Export completed successfully."
+            + (" (Comments removed)" if args.ignore_comments else "")
+            + (" (Single file)" if args.single_file else "")
+        )
+    except Exception as e:
+        print(f"Error during export: {str(e)}")
+
+
+if __name__ == "__main__":
+    main()

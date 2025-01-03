@@ -4,14 +4,6 @@
 
 安装完后，若编译 LaTeX 文件时提示缺少某些包，可以使用 `tlmgr install 包名` 安装。
 
-安装完毕后可以在命令行中运行：
-
-```bash
-make check
-```
-
-检查所需的包是否都已安装。
-
 # 编译/预览
 
 文章主体在 `main.tex` 文件中；各章内容分别在 `sections` 文件夹的对应文件中，比如文章的 Introduction 就在 `sections/intro.tex`中；图片在 `figures` 文件夹中；算法、伪代码等内容可放在 `algorithms` 文件夹中。
@@ -78,7 +70,6 @@ make check
 | `Cite`                     | Add a cite.                                  |
 | `EmptyPage`                | Add an empty page.                           |
 
-
 在编辑器中输入这些缩写，按回车，将会展开为对应的 LaTeX 代码。具体每个缩写对应的内容可以自己输入试试。
 
 # 附件
@@ -135,23 +126,52 @@ make check
 
 # 内容导出
 
-有的会议要求所有的 LaTeX 内容必须写在一个文件中，不能使用 `\input{}` 命令来分别导入各章节，因此当写作完成后有可能还需要将所有的内容导出到一个文件中。
+写作完成后将会有可能面临需要上传 LaTeX 源代码的场景（如提交到 arXiv），这时可以使用 `scripts/` 目录下的 `export.py` 脚本将 LaTeX 项目进行导出。
 
-对于 Unix 系统，在控制台中运行：
-
-```bash
-make export
-```
-
-在 Windows 下没有安装 `make` 的话，可以在根目录下打开控制台，运行：
+在项目根目录下运行：
 
 ```bash
-python scripts/replace-input.py -b %cd% -i main.tex -o export.tex
+./scripts/export
 ```
 
-运行后将会在根目录下生成一个 `export.tex` 文件。
+（虽然 `export`是一个 Python 脚本，但很神奇不需要 `python` 命令来运行，因为脚本中添加了 `shebang` 来指定解释器）
 
-为了保证生成内容无误，最好在生成之后将其编译一遍，检查是否可以正常编译。
+运行后将会在项目根目录下生成一个 `export` 文件夹，里面包含了导出的内容。
+
+**该目录中所包含的内容由根目录下的 `.export` 文件指定**，比如：
+
+```bash
+algorithms/**/*.tex
+main.tex
+main.bib
+*.bst
+*.cls
+```
+
+其中每一条规则都是一个 `glob` 表达式，可以匹配多个文件，比如 `algorithms/**/*.tex` 将会匹配 `algorithms/algorithm1.tex`、`algorithms/subdir/algorithm2.tex` 等。请根据实际情况修改 `.export` 文件。
+
+脚本还有两个可选参数：
+
+```
+usage: export.py [-h] [--single-file] [--ignore-comments]
+
+Export files based on .export configuration
+
+options:
+  -h, --help            show this help message and exit
+  --single-file, -s     Export main.tex only
+  --ignore-comments, -c
+                        Remove comments from exported .tex files
+```
+
+- `--single-file` 参数将会只导出 `main.tex` 文件，其中的所有 `\input{}` 命令将会被递归替换为对应的内容；随后，这些已经被替换的内容将不会被导出；
+- `--ignore-comments` 参数将会在导出的 `.tex` 文件中删除所有的注释；
+
+因此为了简洁，推荐使用如下命令进行导出：
+
+```bash
+./scripts/export.py -s -c
+```
 
 # 内容备份
 
@@ -213,7 +233,7 @@ There are mainly two ways to make braised chicken in chili sauce. One is to cut 
 在本地项目根目录下运行：
 
 ```bash
-make archive
+./scripts/archive
 ```
 
 运行后将会在根目录下生成一个 `archive.zip` 文件，然后在 Overleaf 上新建一个项目，选择上传压缩包，上传 `archive.zip` 文件即可。

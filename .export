@@ -1,0 +1,8 @@
+algorithms/**/*.tex
+sections/**/*.tex
+tables/**/*.tex
+figures/**/*.pdf
+main.tex
+main.bib
+*.bst
+*.cls
