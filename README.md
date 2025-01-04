@@ -143,35 +143,37 @@
 ```bash
 algorithms/**/*.tex
 main.tex
-main.bib
-*.bst
 *.cls
 ```
 
 其中每一条规则都是一个 `glob` 表达式，可以匹配多个文件，比如 `algorithms/**/*.tex` 将会匹配 `algorithms/algorithm1.tex`、`algorithms/subdir/algorithm2.tex` 等。请根据实际情况修改 `.export` 文件。
 
-脚本还有两个可选参数：
+脚本还有几个可选参数：
 
 ```
-usage: export [-h] [--single-file] [--ignore-comments]
+usage: export [-h] [--single-file] [--ignore-comments] [--compress]
 
 Export files based on .export configuration
 
 options:
   -h, --help            show this help message and exit
   --single-file, -s     Export main.tex only
-  --ignore-comments, -c
+  --ignore-comments, -i
                         Remove comments from exported .tex files
+  --compress, -c        Compress export directory
 ```
 
 - `--single-file` 参数将会只导出 `main.tex` 文件，其中的所有 `\input{}` 命令将会被递归替换为对应的内容；随后，这些已经被替换的内容将不会被导出；
 - `--ignore-comments` 参数将会在导出的 `.tex` 文件中删除所有的注释；
+- `--compress` 参数将会在导出后将导出的内容压缩为一个 `zip` 文件。
 
-因此为了简洁，推荐使用如下命令进行导出：
+因此推荐使用如下命令进行导出：
 
 ```bash
-./scripts/export -s -c
+./scripts/export -s -i -c
 ```
+
+随后就可以把生成的 `export.zip` 文件上传到 arXiv 或者其他地方了。
 
 # 内容备份
 

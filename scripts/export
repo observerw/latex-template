@@ -80,6 +80,12 @@ def remove_comments():
         apply(tex_file)
 
 
+def compress():
+    export_zip_path = export_dir_path.with_suffix(".zip")
+    export_zip_path.unlink(missing_ok=True)
+    shutil.make_archive("export", "zip", export_dir_path)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Export files based on .export configuration"
@@ -92,9 +98,15 @@ def main():
     )
     parser.add_argument(
         "--ignore-comments",
-        "-c",
+        "-i",
         action="store_true",
         help="Remove comments from exported .tex files",
+    )
+    parser.add_argument(
+        "--compress",
+        "-c",
+        action="store_true",
+        help="Compress export directory",
     )
     args = parser.parse_args()
 
@@ -108,6 +120,8 @@ def main():
 
         if args.ignore_comments:
             remove_comments()
+        if args.compress:
+            compress()
 
         print(
             f"Export completed successfully."
