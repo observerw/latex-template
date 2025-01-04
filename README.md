@@ -126,7 +126,7 @@
 
 # 内容导出
 
-写作完成后将会有可能面临需要上传 LaTeX 源代码的场景（如提交到 arXiv），这时可以使用 `scripts/` 目录下的 `export.py` 脚本将 LaTeX 项目进行导出。
+写作完成后将会有可能面临需要上传 LaTeX 源代码的场景（如提交到 arXiv），这时可以使用 `scripts/` 目录下的 `export` 脚本将 LaTeX 项目进行导出。
 
 在项目根目录下运行：
 
@@ -153,7 +153,7 @@ main.bib
 脚本还有两个可选参数：
 
 ```
-usage: export.py [-h] [--single-file] [--ignore-comments]
+usage: export [-h] [--single-file] [--ignore-comments]
 
 Export files based on .export configuration
 
@@ -170,7 +170,7 @@ options:
 因此为了简洁，推荐使用如下命令进行导出：
 
 ```bash
-./scripts/export.py -s -c
+./scripts/export -s -c
 ```
 
 # 内容备份

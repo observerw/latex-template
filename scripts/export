@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
+
 import argparse
-import itertools
 import re
 import shutil
 from collections.abc import Generator, Iterable
@@ -14,25 +14,26 @@ main_file_path = Path("main.tex")
 
 
 def transform(path: Path) -> Generator[str, None, list[Path]]:
-    def transform_line(line: str) -> Generator[str, None, Path | None]:
+    def transform_line(line: str) -> Generator[str, None, list[Path]]:
         if not (match := tex_input_re.match(line)):
             yield line
-            return None
+            return []
 
-        input_path = match.group(1)
-        input_path = Path(input_path).with_suffix(".tex")
+        input_path = Path(match.group(1)).with_suffix(".tex")
         if not input_path.exists():
             raise FileNotFoundError(f"File {input_path} included in {path} not found")
 
-        yield from itertools.chain("\n", transform_line(line), "\n")
-        return input_path
+        yield "\n"
+        inner_input_paths = yield from transform(input_path)
+        yield "\n"
+
+        return [input_path, *inner_input_paths]
 
     input_paths: list[Path] = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
-            input_path = yield from transform_line(line)
-            if input_path:
-                input_paths.append(input_path)
+            inner_input_paths = yield from transform_line(line)
+            input_paths.extend(inner_input_paths)
 
     return input_paths
 
@@ -45,15 +46,13 @@ def transform_file() -> list[Path]:
                 f.write(next(content_iter))
             except StopIteration as e:
                 return e.value + [main_file_path]
-    return []
 
 
 def export_files(exclude: Iterable[Path] | None = None):
-    exclude = set(exclude or [])
-
     if not export_blob_path.exists():
         raise FileNotFoundError("No .export file found")
 
+    exclude = set(exclude or [])
     blobs = export_blob_path.read_text(encoding="utf-8").splitlines()
     blobs = (blob for raw_blobs in blobs if (blob := raw_blobs.strip()))
     file_paths = (
@@ -99,24 +98,24 @@ def main():
     )
     args = parser.parse_args()
 
-    try:
-        if export_dir_path.exists():
-            shutil.rmtree(export_dir_path)
-        export_dir_path.mkdir()
+    if export_dir_path.exists():
+        shutil.rmtree(export_dir_path)
+    export_dir_path.mkdir()
 
-        exclude: list[Path] = transform_file() if args.single_file else []
+    try:
+        exclude = transform_file() if args.single_file else []
         export_files(exclude)
 
         if args.ignore_comments:
             remove_comments()
 
         print(
-            "Export completed successfully."
-            + (" (Comments removed)" if args.ignore_comments else "")
-            + (" (Single file)" if args.single_file else "")
+            f"Export completed successfully."
+            f"{' (Comments removed)' if args.ignore_comments else ''}"
+            f"{' (Single file)' if args.single_file else ''}"
         )
     except Exception as e:
-        print(f"Error during export: {str(e)}")
+        print(f"Error during export: {e}")
 
 
 if __name__ == "__main__":
