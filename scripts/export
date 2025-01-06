@@ -7,7 +7,9 @@ from collections.abc import Generator, Iterable
 from pathlib import Path
 
 tex_input_re = re.compile(r"^\s*\\input{(.*?)}")
-comment_re = re.compile(r"^\s*%.*\n")
+comments_re = re.compile(r"(?<!\\)%.*$")
+empty_lines_re = re.compile(r"\n\s*\n+")
+
 export_blob_path = Path(".export")
 
 
@@ -50,7 +52,7 @@ def export_files(export_dir_path: Path, exclude: Iterable[Path] | None = None):
     if not export_blob_path.exists():
         raise FileNotFoundError("No .export file found")
 
-    exclude = set(exclude or [])
+    exclude = set(exclude or ())
     blobs = export_blob_path.read_text(encoding="utf-8").splitlines()
     blobs = (blob for raw_blobs in blobs if (blob := raw_blobs.strip()))
     file_paths = (
@@ -70,8 +72,8 @@ def export_files(export_dir_path: Path, exclude: Iterable[Path] | None = None):
 def remove_comments(export_dir_path: Path):
     def apply(file_path: Path):
         content = file_path.read_text(encoding="utf-8")
-        content = re.sub(r"(?<!\\)%.*$", "", content, flags=re.MULTILINE)
-        content = re.sub(r"\n\s*\n+", "\n\n", content)
+        content = re.sub(comments_re, "", content, flags=re.MULTILINE)
+        content = re.sub(empty_lines_re, "\n\n", content)
         file_path.write_text(content, encoding="utf-8")
 
     for tex_file in export_dir_path.glob("**/*.tex"):
@@ -81,7 +83,7 @@ def remove_comments(export_dir_path: Path):
 def compress(export_dir_path: Path):
     export_zip_path = export_dir_path.with_suffix(".zip")
     export_zip_path.unlink(missing_ok=True)
-    shutil.make_archive(str(export_dir_path), "zip", export_dir_path)
+    shutil.make_archive(export_zip_path.name, "zip", export_dir_path)
 
 
 def main():
@@ -125,13 +127,18 @@ def main():
     export_dir_path = Path(args.export_dir)
     main_file_path = Path(args.main_file)
 
-    if export_dir_path.exists():
-        shutil.rmtree(export_dir_path)
-    export_dir_path.mkdir()
-
     try:
+        if export_dir_path.exists():
+            shutil.rmtree(export_dir_path)
+        export_dir_path.mkdir()
+
+        if not main_file_path.exists():
+            raise FileNotFoundError(f"{main_file_path} does not exists")
+
         exclude = (
-            transform_file(main_file_path, export_dir_path) if args.single_file else []
+            transform_file(main_file_path, export_dir_path)  #
+            if args.single_file
+            else []
         )
         export_files(export_dir_path, exclude)
 
@@ -144,6 +151,7 @@ def main():
             f"Export completed successfully."
             f"{' (Comments removed)' if args.ignore_comments else ''}"
             f"{' (Single file)' if args.single_file else ''}"
+            f"{' (Compressed)' if args.compress else ''}"
         )
     except Exception as e:
         print(f"Error during export: {e}")
