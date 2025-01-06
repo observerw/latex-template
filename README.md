@@ -1,4 +1,14 @@
-# 环境安装
+# 基于 VSCode 的 LaTeX 写作模板库
+
+使用 VSCode 进行 LaTeX 写作需要[配置一些环境](https://zhuanlan.zhihu.com/p/166523064)，此外还需要手动设置目录结构等，较为繁琐。针对这些问题，本模板提供了开箱即用的实现：
+
+- 在 `.vscode` 中做好了必要的设置并推荐安装 `latex-workshop` 等若干插件，一旦插件安装完成，即可无痛编译 `.tex` 文档；
+- 预先设置好了目录结构，将文档中的各类内容归类放置到对应目录即可；
+- 提供了一些[方便的脚本](#内容导出)，用于在写作完成后对文档进行处理，从而便于进行提交；
+
+# ⚠️ （重要）环境安装
+
+在编译文档前请先正确安装 TeX 环境。
 
 按照 [tinytex](https://yihui.org/tinytex/#installation) 的文档安装即可。安装 tinytex 会比完整安装 TexLive 的体积小很多，因此十分推荐。
 
@@ -6,16 +16,16 @@
 
 # 编译/预览
 
-文章主体在 `main.tex` 文件中；各章内容分别在 `sections` 文件夹的对应文件中，比如文章的 Introduction 就在 `sections/intro.tex`中；图片在 `figures` 文件夹中；算法、伪代码等内容可放在 `algorithms` 文件夹中。
+文章主体在 `main.tex` 文件中；各章内容分别在 `sections` 文件夹的对应文件中，如文章的引言部分就在 `sections/intro.tex`中；图片在 `figures` 文件夹中；算法、伪代码等在 `algorithms` 文件夹中。
 
-打开 `main.tex` 文件，点击右上角的绿色箭头执行编译；点击绿色箭头旁边的图标可以预览。由于设置了文件保存时自动编译，所以一般情况下不需要手动按绿色箭头。
+打开 `main.tex` 文件，点击右上角的绿色箭头（或 `Ctrl + S` 保存）即可执行编译；点击绿色箭头旁边的图标可以预览。由于设置了文件保存时自动编译，所以一般情况下不需要手动按绿色箭头。
 
-如果编译出错，点击弹窗中的 `Open compiler log` 按钮，在输入窗口中按 `Ctrl + F` 搜索 `LaTeX Error` 或者 `error` 之类的关键词，快速定位到问题。
+如果编译出错，点击弹窗中的 `Open compiler log` 按钮，在输入窗口中按 `Ctrl + F` **搜索 `LaTeX Error` 或者 `error` 之类的关键词**，快速定位到问题。
 
 编辑器部分和预览部分可以双向定位：
 
 - 在**编辑器中修改了某些内容并保存**后，预览部分将会自动定位到修改的内容；
-- 在编辑器中将**光标置于某个位置**，**按快捷键：`Ctrl + Alt + J`**，预览部分将会自动跳转到光标所在处；
+- 在编辑器中将**光标置于某个位置**，**按快捷键：****`Ctrl + Alt + J`** **Ctrl + Alt + J**，预览部分将会自动跳转到光标所在处；
 - 在**预览部分双击某个内容**，编辑器将会自动定位到对应的位置；
 
 # 快捷输入
@@ -74,7 +84,11 @@
 
 # 附件
 
-图片全部放在 `figures` 目录下，引用的路径为 `figures/figure.pdf`。最好使用 `pdf` 格式的图片。
+图片全部放在 `figures` 目录下，引用的路径为 `figures/figure.pdf`。
+
+- **最好使用 `pdf` 格式的图片**；
+`svg` 图片虽然也是矢量的，但 LaTeX 对其的支持并不好；
+其他图片格式通常不是矢量的，无法无损放大，因此可能会被认为是写作不规范；
 
 引用图片可以使用 `Figure` 缩写，然后在 `label` 中输入图片的文件名，比如：
 
@@ -89,20 +103,24 @@
 
 # 交叉引用
 
-在每一个章节、图、表、公式、算法等地方都要设置一个 `label`，**`label` 最好遵循一定的命名规范**，比如图片使用 `fig:figure`，表格使用 `tab:table`，章节使用 `sec:section`，公式使用 `eq:equation`，算法使用 `algo:algorithm` 等。
+在每一个章节、图、表、公式、算法等地方都要设置一个 `label`，**`label`** **label** **最好遵循一定的命名规范**，比如图片使用 `fig:figure`，表格使用 `tab:table`，章节使用 `sec:section`，公式使用 `eq:equation`，算法使用 `algo:algorithm` 等。
 
 引用时可以输入相应的缩写，然后在 `label` 中输入引用的 `label`，比如想要引用 `label` 为 `fig:figure` 的图片，可以使用 `Figure:Ref` 缩写，然后在 `label` 中输入 `fig:figure`。
 
 # 文献引用
 
-假设大家都会用 Zotero。
+假设大家都会用 Zotero，尤其是 [Better BibTeX 插件](https://snailwish.com/291/)。
 
-给 Zotero 安装一个名为 `Zotero Better BibTeX` 的插件，为当前正在写作的项目单独创建一个 Zotero 文件夹，右键，导出分类，选择导出格式为 `Better BibTeX`，勾选保持更新，选择导出路径为当前项目的根目录，随后根目录下就会生成一个 `*.bib` 文件。
+正确安装该插件后：
 
-在 `main.tex` 中将 `\bibliography{}` 命令指向这个 `*.bib` 文件，比如：
+1. 为当前正在写作的项目单独创建一个 Zotero 分类；
+2. 右键，导出分类，选择导出格式为 `Better BibTeX`，勾选保持更新，选择导出路径为当前项目的根目录；
+3. 将导出名称修改为 `main.bib`（名称最好不要随便起，arXiv要求 `bib` 必须与 `tex`的名称保持一致），随后根目录下就会生成相应的 `bib` 文件了；
+
+在 `main.tex` 中将 `\bibliography{}` 命令指向这个 `bib` 文件，比如：
 
 ```latex
-\bibliography{references.bib}
+\bibliography{main.bib}
 ```
 
 这样就可以自动生成参考文献列表了。
@@ -126,7 +144,7 @@
 
 # 内容导出
 
-写作完成后将会有可能面临需要上传 LaTeX 源代码的场景（如提交到 arXiv），这时可以使用 `scripts/` 目录下的 `export` 脚本将 LaTeX 项目进行导出。
+写作完成后将会有可能面临需要上传 LaTeX 源代码的场景（如提交到 arXiv），这时可以使用 `scripts/` 目录中提供的 `export` 脚本将 LaTeX 项目进行导出。
 
 在项目根目录下运行：
 
@@ -136,7 +154,7 @@
 
 （虽然 `export`是一个 Python 脚本，但很神奇不需要 `python` 命令来运行，因为脚本中添加了 `shebang` 来指定解释器）
 
-运行后将会在项目根目录下生成一个 `export` 文件夹，里面包含了导出的内容。
+运行后将会在项目根目录下生成一个 `export` 目录，里面包含了导出的内容。
 
 **该目录中所包含的内容由根目录下的 `.export` 文件指定**，比如：
 
@@ -150,8 +168,8 @@ main.tex
 
 脚本还有几个可选参数：
 
-```
-usage: export [-h] [--single-file] [--ignore-comments] [--compress]
+````
+usage: export [-h] [--single-file] [--ignore-comments] [--compress] [--export-dir EXPORT_DIR] [--main-file MAIN_FILE]
 
 Export files based on .export configuration
 
@@ -161,7 +179,11 @@ options:
   --ignore-comments, -i
                         Remove comments from exported .tex files
   --compress, -c        Compress export directory
-```
+  --export-dir EXPORT_DIR, -d EXPORT_DIR
+                        Custom name for the export directory
+  --main-file MAIN_FILE, -m MAIN_FILE
+                        Custom name for the main .tex file
+````
 
 - `--single-file` 参数将会只导出 `main.tex` 文件，其中的所有 `\input{}` 命令将会被递归替换为对应的内容；随后，这些已经被替换的内容将不会被导出；
 - `--ignore-comments` 参数将会在导出的 `.tex` 文件中删除所有的注释；
@@ -173,11 +195,13 @@ options:
 ./scripts/export -s -i -c
 ```
 
-随后就可以把生成的 `export.zip` 文件上传到 arXiv 或者其他地方了。
+随后就可以把在根目录下生成的 `export.zip` 文件上传到 arXiv 或者其他地方了。
 
 # 内容备份
 
-为了防止内容丢失，写完一个部分之后 `git commit` 一下；将仓库推送到一个私人的远程仓库或设置为 private 的 GitHub 仓库中；或者使用一个单独的外接硬盘定期对仓库进行备份。
+- 为了防止内容丢失，写完一个部分之后 `git commit` 一下；
+- 将仓库推送到一个私人的远程仓库或设置为 private 的 GitHub 仓库中；
+- 或者使用一个单独的外接硬盘定期对仓库进行备份；
 
 # TODO
 
