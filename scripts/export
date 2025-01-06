@@ -9,8 +9,6 @@ from pathlib import Path
 tex_input_re = re.compile(r"^\s*\\input{(.*?)}")
 comment_re = re.compile(r"^\s*%.*\n")
 export_blob_path = Path(".export")
-export_dir_path = Path("export")
-main_file_path = Path("main.tex")
 
 
 def transform(path: Path) -> Generator[str, None, list[Path]]:
@@ -38,7 +36,7 @@ def transform(path: Path) -> Generator[str, None, list[Path]]:
     return input_paths
 
 
-def transform_file() -> list[Path]:
+def transform_file(main_file_path: Path, export_dir_path: Path) -> list[Path]:
     content_iter = transform(main_file_path)
     with open(export_dir_path / "main.tex", "w", encoding="utf-8") as f:
         while True:
@@ -48,7 +46,7 @@ def transform_file() -> list[Path]:
                 return e.value + [main_file_path]
 
 
-def export_files(exclude: Iterable[Path] | None = None):
+def export_files(export_dir_path: Path, exclude: Iterable[Path] | None = None):
     if not export_blob_path.exists():
         raise FileNotFoundError("No .export file found")
 
@@ -69,7 +67,7 @@ def export_files(exclude: Iterable[Path] | None = None):
         print(f"Exported: {file_path}")
 
 
-def remove_comments():
+def remove_comments(export_dir_path: Path):
     def apply(file_path: Path):
         content = file_path.read_text(encoding="utf-8")
         content = re.sub(r"(?<!\\)%.*$", "", content, flags=re.MULTILINE)
@@ -80,10 +78,10 @@ def remove_comments():
         apply(tex_file)
 
 
-def compress():
+def compress(export_dir_path: Path):
     export_zip_path = export_dir_path.with_suffix(".zip")
     export_zip_path.unlink(missing_ok=True)
-    shutil.make_archive("export", "zip", export_dir_path)
+    shutil.make_archive(str(export_dir_path), "zip", export_dir_path)
 
 
 def main():
@@ -108,20 +106,39 @@ def main():
         action="store_true",
         help="Compress export directory",
     )
+    parser.add_argument(
+        "--export-dir",
+        "-d",
+        type=str,
+        default="export",
+        help="Custom name for the export directory",
+    )
+    parser.add_argument(
+        "--main-file",
+        "-m",
+        type=str,
+        default="main.tex",
+        help="Custom name for the main .tex file",
+    )
     args = parser.parse_args()
+
+    export_dir_path = Path(args.export_dir)
+    main_file_path = Path(args.main_file)
 
     if export_dir_path.exists():
         shutil.rmtree(export_dir_path)
     export_dir_path.mkdir()
 
     try:
-        exclude = transform_file() if args.single_file else []
-        export_files(exclude)
+        exclude = (
+            transform_file(main_file_path, export_dir_path) if args.single_file else []
+        )
+        export_files(export_dir_path, exclude)
 
         if args.ignore_comments:
-            remove_comments()
+            remove_comments(export_dir_path)
         if args.compress:
-            compress()
+            compress(export_dir_path)
 
         print(
             f"Export completed successfully."
